@@ -1,0 +1,16 @@
+[Unit]
+Description= regulation temperature
+After=syslog.target network.target # quand les autres services sont ACTIFS
+Documentation=man:cron(8)  # pour man.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/python /storage/rpi_fan.py
+Type = simple
+RemainAfterExit = no
+User = root
+Killmode = process
+
+
+[Install]
+WantedBy=multi-user.target
