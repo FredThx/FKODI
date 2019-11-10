@@ -8,7 +8,7 @@
 
 ![Wiring](./wiring.png)
 
-#Dependancies
+# Dependencys
 
 Rpi.GPIO (python)
 
