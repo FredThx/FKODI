@@ -17,6 +17,7 @@ GPIO18 ---- Base
 #TODO (si necessaire) : faire du PWM pour réguler la vitesse du ventilateur + PID
 
 import sys
+import os
 import time
 from subprocess import PIPE, Popen
 
@@ -29,8 +30,9 @@ except ImportError:
 
 class Rpi_fan:
     ''' Un régulateur de température
+    + bouton reboot
     '''
-    def __init__(self, target_temp = 45, pin = 24):
+    def __init__(self, target_temp = 45, pin = 24, pin_reboot = 21):
         '''Initialisation :
             target_temp     :   the target temperature °C (default : 45°C)
             pin             :   the GPIO (default : GPIO18)
@@ -39,6 +41,8 @@ class Rpi_fan:
         self.pin = pin
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.setup(pin_reboot, GPIO.IN)
+        GPIO.add_event_detect(pin_reboot, GPIO.FALLING, callback=self.reboot, bouncetime=200)
 
     def run(self, delay = 1):
         '''Run forever
@@ -61,6 +65,12 @@ class Rpi_fan:
         process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)
         output, _error = process.communicate()
         return float(output[output.index('=') + 1:output.rindex("'")])
+
+    def reboot(self, *args):
+        ''' Reboot the RPi
+        '''
+        os.system("reboot")
+
 
 if __name__ == "__main__":
     rpi_fan = Rpi_fan(target_temp = 45, pin = 24)
