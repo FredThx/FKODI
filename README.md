@@ -2,7 +2,7 @@
  A deamon for KODI on Raspberry (fan, button)
 
  * Temperature regulation with FAN
- * reboot button (coming soon)
+ * reboot button 
 
 # Wiring
 

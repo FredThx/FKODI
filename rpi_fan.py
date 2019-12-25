@@ -32,7 +32,7 @@ class Rpi_fan:
     ''' Un régulateur de température
     + bouton reboot
     '''
-    def __init__(self, target_temp = 45, pin = 24, pin_reboot = 21):
+    def __init__(self, target_temp = 50, pin = 24, pin_reboot = 21):
         '''Initialisation :
             target_temp     :   the target temperature °C (default : 45°C)
             pin             :   the GPIO (default : GPIO18)
@@ -42,7 +42,7 @@ class Rpi_fan:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
         GPIO.setup(pin_reboot, GPIO.IN)
-        GPIO.add_event_detect(pin_reboot, GPIO.FALLING, callback=self.reboot, bouncetime=200)
+        GPIO.add_event_detect(pin_reboot, GPIO.FALLING, callback=self.bt_pressed, bouncetime=200)
 
     def run(self, delay = 1):
         '''Run forever
@@ -59,6 +59,7 @@ class Rpi_fan:
                 print("Fan off")
             time.sleep(delay)
 
+
     def get_gpu_temperature(self):
         ''' Return the GPU temperature in °C using vcgencmd
         '''
@@ -66,9 +67,33 @@ class Rpi_fan:
         output, _error = process.communicate()
         return float(output[output.index('=') + 1:output.rindex("'")])
 
-    def reboot(self, *args):
-        ''' Reboot the RPi
+    def bt_pressed(self, channel, long_press_duration = 3, timeout = 8):
+        ''' When bt pressed.
+            Detect if it is a long a short press
         '''
+        now = time.time()
+        while GPIO.input(channel)==GPIO.LOW and time.time()< now + timeout:
+            time.sleep(0.1)
+        duration = time.time() - now
+        if duration < long_press_duration:
+            self.reboot()
+        elif duration < timeout:
+            self.halt()
+        else:
+            print("Timeout!")
+
+
+    def halt(self):
+        '''Halt the system
+        '''
+        print("halt")
+        os.system("halt")
+
+
+    def reboot(self, *args):
+        ''' Reboot the system
+        '''
+        print("reboot")
         os.system("reboot")
 
 
